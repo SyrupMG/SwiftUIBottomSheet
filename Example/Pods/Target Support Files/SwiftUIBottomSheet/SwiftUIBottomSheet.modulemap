@@ -1,0 +1,6 @@
+framework module SwiftUIBottomSheet {
+  umbrella header "SwiftUIBottomSheet-umbrella.h"
+
+  export *
+  module * { export * }
+}

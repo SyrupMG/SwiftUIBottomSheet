@@ -1,0 +1,29 @@
+# SwiftUIBottomSheet
+
+[![CI Status](https://img.shields.io/travis/SyrupMG/SwiftUIBottomSheet.svg?style=flat)](https://travis-ci.org/horovodovodo4ka/SwiftUIBottomSheet)
+[![Version](https://img.shields.io/cocoapods/v/SwiftUIBottomSheet.svg?style=flat)](https://cocoapods.org/pods/SwiftUIBottomSheet)
+[![License](https://img.shields.io/cocoapods/l/SwiftUIBottomSheet.svg?style=flat)](https://cocoapods.org/pods/SwiftUIBottomSheet)
+[![Platform](https://img.shields.io/cocoapods/p/SwiftUIBottomSheet.svg?style=flat)](https://cocoapods.org/pods/SwiftUIBottomSheet)
+
+## Example
+
+To run the example project, clone the repo, and run `pod install` from the Example directory first.
+
+## Requirements
+
+## Installation
+
+SwiftUIBottomSheet is available through [CocoaPods](https://cocoapods.org). To install
+it, simply add the following line to your Podfile:
+
+```ruby
+pod 'SwiftUIBottomSheet'
+```
+
+## Author
+
+horovodovodo4ka, xbitstream@gmail.com
+
+## License
+
+SwiftUIBottomSheet is available under the MIT license. See the LICENSE file for more info.

@@ -1,0 +1,26 @@
+{
+  "name": "SwiftUIBottomSheet",
+  "version": "0.1.0",
+  "summary": "A short description of SwiftUIBottomSheet.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/horovodovodo4ka/SwiftUIBottomSheet",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "horovodovodo4ka": "xbitstream@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/horovodovodo4ka/SwiftUIBottomSheet.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "13.0"
+  },
+  "source_files": "SwiftUIBottomSheet/Classes/**/*",
+  "frameworks": [
+    "UIKit",
+    "SwiftUI"
+  ]
+}
