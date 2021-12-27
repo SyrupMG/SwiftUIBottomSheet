@@ -302,11 +302,14 @@ private struct BottomSheetContainer<Content: View>: View {
     }
 
     func sheetContent(geometry: GeometryProxy) -> some View {
-        VStack(spacing: 0) {
-            topBar(geometry: geometry)
+        ZStack(alignment: .top) {
             content
+                .padding(.top, topBarHeight)
+                .frame(height: height, alignment: .top)
+            
+            topBar(geometry: geometry)
+                .frame(height: height, alignment: .top)
         }
-        .frame(height: height, alignment: .top)
         .background(
             config.background
                 .frame(height: height + 6000, alignment: .top)
