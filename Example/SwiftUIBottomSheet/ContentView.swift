@@ -83,6 +83,7 @@ struct ContentView: View {
             sheetContent
         }
         .onValueChange(requestedSize) { sz in
+//            height = min(600.0, max(200.0, sz))
             if height < 220 && sz > 220 {
                 height = 600
             } else if height > 580 && sz < 580 {

@@ -1,5 +1,5 @@
 PODS:
-  - SwiftUIBottomSheet (0.1.0)
+  - SwiftUIBottomSheet (1.0.0)
 
 DEPENDENCIES:
   - SwiftUIBottomSheet (from `../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../"
 
 SPEC CHECKSUMS:
-  SwiftUIBottomSheet: 032086650d7e60a1ab78b1bec7ff359b91fbb8b9
+  SwiftUIBottomSheet: 78f8c09e4d9f96a9e4d44fe88360eafe5c14b1a0
 
 PODFILE CHECKSUM: 70f5db4aeeddce16f15ee5454fd9c58ef6389684
 
