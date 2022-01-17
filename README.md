@@ -75,7 +75,7 @@ struct ContentView: View {
     }
 ```
 
-For cases where you have predefined config (for setting up colors etc.) there is method `.feedback(into: Binding<CGFloat>)` provided by labrary:
+For cases where you have predefined config (for setting up colors etc.) there is method `.feedback(into: Binding<CGFloat>)` provided by library:
 ```swift
   .bottomSheet(isPresented: $isShown, config: config.feedback(into: $requestedSize)) { // where `config` is predefined shared configuration
       ...
@@ -85,7 +85,7 @@ For cases where you have predefined config (for setting up colors etc.) there is
 That's all, folks :-)
 
 ## Additional
-Also SwiftUIBottomSheet provides `.modal()` method because it used to present viewcontroller on wich bottom sheet is drawn. You can use it same way as SwiftUI  `.sheet` method. Main difference is that it shown over full screen instead of beeng sheet.
+Also SwiftUIBottomSheet provides `.modal()` method because it used to present viewcontroller on wich bottom sheet is drawn. You can use it same way as SwiftUI  `.sheet` method. Main difference is that it shown over full screen instead of being sheet.
 
 ```swift
 .modal(isPresenting: $isPresenting) {
