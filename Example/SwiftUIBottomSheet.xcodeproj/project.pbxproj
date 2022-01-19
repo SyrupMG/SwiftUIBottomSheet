@@ -15,7 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		320043B74A877DE712E24CD7 /* SwiftUIBottomSheet.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SwiftUIBottomSheet.podspec; path = ../SwiftUIBottomSheet.podspec; sourceTree = "<group>"; };
+		320043B74A877DE712E24CD7 /* SwiftUIBottomSheet.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = SwiftUIBottomSheet.podspec; path = ../SwiftUIBottomSheet.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		52A6F0BB2774BE94000A72D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		52A6F0D5277A0FAF000A72D7 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Package.swift; path = ../Package.swift; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* SwiftUIBottomSheet_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SwiftUIBottomSheet_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
