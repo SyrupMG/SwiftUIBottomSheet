@@ -79,13 +79,13 @@ private struct _PresentationView<Content: View>: UIViewRepresentable {
 
     @Binding var isPresented: Bool
     let config: PresentationConfig
-    let content: () -> Content
+    let content: Content
 
     private var view: UIViewType?
 
     init(isPresenting: Binding<Bool>, config: PresentationConfig = .init(), @ViewBuilder content: @escaping () -> Content) {
         self._isPresented = isPresenting
-        self.content = content
+        self.content = content()
         self.config = config
     }
 
@@ -112,7 +112,7 @@ private struct _PresentationView<Content: View>: UIViewRepresentable {
 
 private class SuiView<Content: View>: UIView {
     var isPresenting: Binding<Bool>!
-    var content: (() -> Content)! {
+    var content: Content! {
         didSet {
             controller?.content = content
         }
@@ -135,7 +135,7 @@ private class SuiView<Content: View>: UIView {
               controller.presentedViewController == nil,
         let content = content else { return }
 
-        let container = SuiController(rootView: content())
+        let container = SuiController(rootView: content)
         container.delegate = self
         switch config.style {
             case .overlay:
@@ -163,7 +163,7 @@ private class SuiController<Content: View>: UIHostingController<Content> {
 
     private var isDestroying = false
 
-    var content: (() -> Content)! {
+    var content: Content! {
         didSet {
             redraw()
         }
@@ -171,7 +171,7 @@ private class SuiController<Content: View>: UIHostingController<Content> {
 
     func redraw() {
         guard !isDestroying else { return }
-        rootView = content()
+        rootView = content
     }
 
     override func viewWillAppear(_ animated: Bool) {
