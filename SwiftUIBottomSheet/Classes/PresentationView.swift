@@ -58,7 +58,7 @@ private struct PresentationViewModifier<PresentedContent: View>: ViewModifier {
         ZStack {
             content
 
-            PresentationView(isPresenting: $isPresented, config: config, content: self.content)
+            PresentationView(isPresenting: $isPresented, config: config, content: self.content())
         }
     }
 }
@@ -66,11 +66,11 @@ private struct PresentationViewModifier<PresentedContent: View>: ViewModifier {
 private struct PresentationView<Content: View>: View {
     @Binding var isPresenting: Bool
     let config: PresentationConfig
-    @ViewBuilder let content: () -> Content
+    let content: Content
 
     var body: some View {
         _PresentationView(isPresenting: $isPresenting, config: config, content: self.content)
-        .frame(width: 0, height: 0)
+            .frame(width: 0, height: 0)
     }
 }
 
@@ -83,9 +83,9 @@ private struct _PresentationView<Content: View>: UIViewRepresentable {
 
     private var view: UIViewType?
 
-    init(isPresenting: Binding<Bool>, config: PresentationConfig = .init(), @ViewBuilder content: @escaping () -> Content) {
+    init(isPresenting: Binding<Bool>, config: PresentationConfig = .init(), content: Content) {
         self._isPresented = isPresenting
-        self.content = content()
+        self.content = content
         self.config = config
     }
 
@@ -107,6 +107,7 @@ private struct _PresentationView<Content: View>: UIViewRepresentable {
 
     static func dismantleUIView(_ uiView: UIViewType, coordinator: ()) {
         uiView.dismiss(force: true)
+        uiView.content = nil
     }
 }
 
@@ -133,7 +134,7 @@ private class SuiView<Content: View>: UIView {
               controller == nil,
               let controller = parentViewController,
               controller.presentedViewController == nil,
-        let content = content else { return }
+              let content = content else { return }
 
         let container = SuiController(rootView: content)
         container.delegate = self
