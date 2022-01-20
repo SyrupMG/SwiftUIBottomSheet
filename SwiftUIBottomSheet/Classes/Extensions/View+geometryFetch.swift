@@ -24,11 +24,12 @@ private struct GeometryGetterMod: ViewModifier {
                     Color.clear
                         .preference(key: SizePreferenceKey.self, value: g.frame(in: .global).size)
                 }
-                    .onPreferenceChange(SizePreferenceKey.self) { preferences in
-                        if size != preferences {
-                            size = preferences
-                        }
+                .onPreferenceChange(SizePreferenceKey.self) { preferences in
+                    if Int(size.height * 100) != Int(preferences.height * 100) &&
+                        Int(size.width * 100) != Int(preferences.width * 100) {
+                        size = preferences
                     }
+                }
             )
     }
 }
