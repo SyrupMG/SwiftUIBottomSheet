@@ -7,7 +7,7 @@
 import Foundation
 import SwiftUI
 
-extension View {
+public extension View {
     @ViewBuilder
     func geometryFetch(size: Binding<CGSize>) -> some View {
         modifier(GeometryGetterMod(size: size))
@@ -25,8 +25,7 @@ private struct GeometryGetterMod: ViewModifier {
                         .preference(key: SizePreferenceKey.self, value: g.frame(in: .global).size)
                 }
                 .onPreferenceChange(SizePreferenceKey.self) { preferences in
-                    if Int(size.height * 100) != Int(preferences.height * 100) &&
-                        Int(size.width * 100) != Int(preferences.width * 100) {
+                    if size != preferences {
                         size = preferences
                     }
                 }
