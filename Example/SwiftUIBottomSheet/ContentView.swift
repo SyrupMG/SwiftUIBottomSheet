@@ -18,11 +18,13 @@ struct ContentView: View {
     @State private var overgrowContent = false
 
     var config: BottomSheetConfig {
-        .init(kind: sheetType)
+        .init(kind: sheetType, handlePosition: handlePosition)
     }
 
+    @State var handlePosition: BottomSheetConfig.HandlePosition = .inside
+
     var body: some View {
-        VStack {
+        VStack(spacing: 20) {
             Button("static") {
                 overgrowContent = false
                 sheetType = .static
@@ -78,6 +80,8 @@ struct ContentView: View {
                 sheetType = .interactiveDismiss
                 isShown = true
             }
+
+            changeHandleButton
         }
         .bottomSheet(isPresented: $isShown, config: config.feedback(into: $requestedSize)) {
             sheetContent
@@ -89,6 +93,12 @@ struct ContentView: View {
             } else if height > 580 && sz < 580 {
                 height = 200
             }
+        }
+    }
+
+    var changeHandleButton: some View {
+        Button("Change handle position") {
+            handlePosition = handlePosition == .inside ? .outside : .inside
         }
     }
 
@@ -112,10 +122,14 @@ struct ContentView: View {
                 Color.yellow
                     .frame(height: height, alignment: .top)
 
-                Button("Dismiss") {
-                    isShown = false
+                VStack(spacing: 20) {
+                    Button("Dismiss") {
+                        isShown = false
+                    }
+                    .padding()
+
+                    changeHandleButton
                 }
-                .padding()
             }
             .frame(height: height, alignment: .top)
         }

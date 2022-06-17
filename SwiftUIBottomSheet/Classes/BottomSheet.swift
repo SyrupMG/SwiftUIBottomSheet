@@ -27,6 +27,7 @@ public struct BottomSheetConfig {
                 shadow: Color? = .init(.black).opacity(0.4),
                 background: Color = .init(.systemBackground),
                 handleColor: Color = .init(.lightGray),
+                handlePosition: HandlePosition = .inside,
                 topBarCornerRadius: CGFloat? = nil,
                 sizeChangeRequest: Binding<CGFloat> = .constant(0)) {
         self.maxHeight = maxHeight
@@ -35,6 +36,7 @@ public struct BottomSheetConfig {
         self.shadow = shadow
         self.background = background
         self.handleColor = handleColor
+        self.handlePosition = handlePosition
         self.topBarCornerRadius = topBarCornerRadius
         self.sizeChangeRequest = sizeChangeRequest
     }
@@ -47,12 +49,18 @@ public struct BottomSheetConfig {
         case interactiveDismiss
     }
 
+    public enum HandlePosition: Int {
+        case inside
+        case outside
+    }
+
     public var maxHeight: CGFloat
     public var kind: Kind
     public var overlayColor: Color
     public var shadow: Color?
     public var background: Color
     public var handleColor: Color
+    public var handlePosition: HandlePosition
     public var topBarCornerRadius: CGFloat?
     public var sizeChangeRequest: Binding<CGFloat>
 }
@@ -301,19 +309,28 @@ private struct BottomSheetContainer<Content: View>: View {
         .offset(y: offset)
     }
 
+    @ViewBuilder
     func sheetContent(geometry: GeometryProxy) -> some View {
+        let shift = config.handlePosition == .inside && canDrag ? 0 : topBarHeight
+
+        let clipShape = RoundedCorner(radius: topBarCornerRadius, corners: [.topLeft, .topRight])
+
+        let sheetHeight = height - shift
+
         ZStack(alignment: .top) {
             content
-                .padding(.top, topBarHeight)
-                .frame(height: height, alignment: .top)
-            
+                .padding(.top, topBarHeight - shift)
+                .clipShape(clipShape)
+                .frame(height: sheetHeight, alignment: .top)
+
             topBar(geometry: geometry)
-                .frame(height: height, alignment: .top)
+                .padding(.top, -shift)
+                .frame(height: sheetHeight, alignment: .top)
         }
         .background(
             config.background
-                .frame(height: height + 6000, alignment: .top)
-                .clipShape(RoundedCorner(radius: topBarCornerRadius, corners: [.topLeft, .topRight]))
+                .frame(height: sheetHeight + 6000, alignment: .top)
+                .clipShape(clipShape)
             , alignment: .top
         )
     }

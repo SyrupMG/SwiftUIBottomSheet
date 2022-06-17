@@ -22,7 +22,7 @@ private struct GeometryGetterMod: ViewModifier {
             .background(
                 GeometryReader { g in
                     Color.clear
-                        .preference(key: SizePreferenceKey.self, value: g.frame(in: .global).size)
+                        .preference(key: SizePreferenceKey.self, value: g.size.roundedToScale)
                 }
                 .onPreferenceChange(SizePreferenceKey.self) { preferences in
                     if size != preferences {
@@ -40,5 +40,19 @@ private struct SizePreferenceKey: PreferenceKey {
 
     static func reduce(value: inout Value, nextValue: () -> Value) {
         value = nextValue()
+    }
+}
+
+extension CGFloat {
+    var roundedToScale: Self {
+        let scale = UIScreen.main.scale
+        return (self * scale).rounded() / scale
+    }
+}
+
+extension CGSize {
+    var roundedToScale: Self {
+        .init(width: width.roundedToScale,
+              height: height.roundedToScale)
     }
 }
