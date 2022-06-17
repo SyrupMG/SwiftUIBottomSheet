@@ -44,6 +44,7 @@ struct BottomSheetConfig {
     var shadow: Color? // color of shadow around sheet, shadow is absent when set to nil
     var background: Color // color of sheet background, default is system background color
     var handleColor: Color // color of drag handle, default is gray
+    var handlePosition: HandlePosition // position of drag handle when it visible - inside or outside bottomsheet
     var topBarCornerRadius: CGFloat? // radius of top corners of sheet, default is nil wich equals to 15 
     var sizeChangeRequest: Binding<CGFloat> // binding wich changed when user changed size of sheet by dragging it's handle (see more info below)
 }
