@@ -37,6 +37,11 @@ struct BottomSheetConfig {
         case resizable // can not be dismissed but has ability to be resized - drag handle is drawn at top of bottom sheet
         case interactiveDismiss // bottom sheet can be dismissed by tapping outside of it or swiped down with drag handle
     }
+    
+    enum HandlePosition {
+        case inside // drag handle drawn inside bottomsheet adding padding to content
+        case outside // drag handle drawn outside
+    }
 
     var maxHeight: CGFloat // max height of sheet to prevent overgrow outside of screen, default is 600
     var kind: Kind // type of sheet behavior, default is .interactiveDismiss
