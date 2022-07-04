@@ -23,14 +23,17 @@ public struct OvergrowScrollView<Content: View>: View {
     @State private var height: CGFloat = 0
 
     public var body: some View {
-        Group {
-            if height > maxHeight {
-                ScrollView {
+        VStack {
+            Group {
+                if height > maxHeight {
+                    ScrollView {
+                        mainContent
+                    }
+                } else {
                     mainContent
                 }
-            } else {
-                mainContent
             }
+            .frame(height: contentHeight, alignment: .topLeading)
         }
         .frame(height: contentHeight, alignment: .topLeading)
         .clipped()
