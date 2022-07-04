@@ -20,7 +20,7 @@ public struct OvergrowScrollView<Content: View>: View {
     public let content: () -> Content
 
     @State private var size: CGSize = .zero
-    @State private var height: CGFloat = -1
+    @State private var height: CGFloat = 0
 
     public var body: some View {
         Group {

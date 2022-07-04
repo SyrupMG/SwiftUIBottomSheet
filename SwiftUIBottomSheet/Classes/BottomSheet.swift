@@ -171,7 +171,7 @@ private struct _BottomSheetContent<Content: View>: View {
     @ViewBuilder var sheetContent: () -> Content
 
     @State private var size: CGSize = .zero
-    @State private var height: CGFloat = -1
+    @State private var height: CGFloat = 0
 
     private func hide() {
         isPresented = false
@@ -315,7 +315,7 @@ private struct BottomSheetContainer<Content: View>: View {
 
         let clipShape = RoundedCorner(radius: topBarCornerRadius, corners: [.topLeft, .topRight])
 
-        let sheetHeight = height - shift
+        let sheetHeight = max(0, height - shift)
 
         ZStack(alignment: .top) {
             content

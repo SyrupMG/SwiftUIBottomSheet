@@ -18,10 +18,10 @@ struct ContentView: View {
     @State private var overgrowContent = false
 
     var config: BottomSheetConfig {
-        .init(kind: sheetType, handlePosition: handlePosition)
+        .init(kind: sheetType, handlePosition: outsideHandle ? .outside : .inside)
     }
 
-    @State var handlePosition: BottomSheetConfig.HandlePosition = .inside
+    @State var outsideHandle = false
 
     var body: some View {
         VStack(spacing: 20) {
@@ -98,7 +98,7 @@ struct ContentView: View {
 
     var changeHandleButton: some View {
         Button("Change handle position") {
-            handlePosition = handlePosition == .inside ? .outside : .inside
+            outsideHandle.toggle()
         }
     }
 

@@ -150,6 +150,7 @@
 				TargetAttributes = {
 					607FACCF1AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = 759986MD54;
 						LastSwiftMigration = 0900;
 					};
 				};
@@ -356,6 +357,7 @@
 			baseConfigurationReference = D01EB45836B1D9F596223A15 /* Pods-SwiftUIBottomSheet_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 759986MD54;
 				INFOPLIST_FILE = SwiftUIBottomSheet/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -372,6 +374,7 @@
 			baseConfigurationReference = 704568E59D6E9C95BA0C5198 /* Pods-SwiftUIBottomSheet_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 759986MD54;
 				INFOPLIST_FILE = SwiftUIBottomSheet/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
