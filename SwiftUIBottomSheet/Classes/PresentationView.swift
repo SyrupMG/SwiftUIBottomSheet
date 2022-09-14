@@ -9,196 +9,207 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public extension View {
-    @ViewBuilder
-    func modal<Content: View>(isPresenting: Binding<Bool>, config: PresentationConfig = .init(), @ViewBuilder content: @escaping () -> Content) -> some View {
-        modifier(PresentationViewModifier(isPresented: isPresenting, config: config, content: content))
-    }
+extension View {
+    func presentation<Content: View>(isPresenting: Binding<Bool>, content: @escaping () -> Content) -> some View {
 
-    @ViewBuilder
-    func modal<Content: View, Item>(item: Binding<Item?>, config: PresentationConfig = .init(), @ViewBuilder content: @escaping (Item) -> Content) -> some View {
-        modifier(PresentationViewModifier(isPresented: item.asBool(), config: config) {
-            if let value = item.wrappedValue {
-                content(value)
-            } else {
-                EmptyView()
-            }
-        })
+        overlay(
+            PresentationView(isPresenting: isPresenting, content: content)
+                .frame(width: 0, height: 0)
+        )
     }
 }
 
-public struct PresentationConfig {
-    public init(style: PresentationConfig.Style = .overlay, transition: PresentationConfig.Transition = .slide, animated: Bool = true) {
-        self.style = style
-        self.transition = transition
-        self.animated = animated
-    }
+private struct PresentationView<Content: View>: UIViewRepresentable {
+    let isPresenting: Binding<Bool>
+    let content: () -> Content
 
-    public var style: Style = .overlay
-    public var transition: Transition = .slide
-    public var animated = true
-
-    public enum Style {
-        case fullscreen
-        case overlay
-    }
-
-    public enum Transition {
-        case fade
-        case slide
-    }
-}
-
-private struct PresentationViewModifier<PresentedContent: View>: ViewModifier {
-    @Binding var isPresented: Bool
-    let config: PresentationConfig
-    @ViewBuilder let content: () -> PresentedContent
-
-    func body(content: Content) -> some View {
-        ZStack {
-            content
-
-            PresentationView(isPresenting: $isPresented, config: config, content: self.content())
-        }
-    }
-}
-
-private struct PresentationView<Content: View>: View {
-    @Binding var isPresenting: Bool
-    let config: PresentationConfig
-    let content: Content
-
-    var body: some View {
-        _PresentationView(isPresenting: $isPresenting, config: config, content: self.content)
-            .frame(width: 0, height: 0)
-    }
-}
-
-private struct _PresentationView<Content: View>: UIViewRepresentable {
-    typealias UIViewType = SuiView<Content>
-
-    @Binding var isPresented: Bool
-    let config: PresentationConfig
-    let content: Content
-
-    private var view: UIViewType?
-
-    init(isPresenting: Binding<Bool>, config: PresentationConfig = .init(), content: Content) {
-        self._isPresented = isPresenting
-        self.content = content
-        self.config = config
+    func makeUIView(context: Context) -> SUIVeiw<Content> {
+        .init()
     }
 
     func updateUIView(_ uiView: UIViewType, context: Context) {
-        uiView.content = content
-        uiView.isPresenting = $isPresented
-        uiView.config = config
+        if isPresenting.wrappedValue {
+            if uiView.controller == nil {
+                let controller = PresentingController(rootView: content())
+                uiView.controller = controller
 
-        if isPresented {
-            uiView.present()
+                uiView.parentViewController?.present(controller, animated: true)
+            } else {
+                uiView.controller?.setContent(content())
+            }
+
+            uiView.controller?.setBinding(isPresenting)
+
         } else {
-            uiView.dismiss()
+            uiView.controller?.dismiss(animated: true)
         }
     }
 
-    func makeUIView(context: Context) -> UIViewType {
-        SuiView(frame: .zero)
-    }
+    final class SUIVeiw<Content: View>: UIView {
 
-    static func dismantleUIView(_ uiView: UIViewType, coordinator: ()) {
-        uiView.dismiss(force: true)
-        uiView.content = nil
+        fileprivate weak var controller: PresentingController<Content>?
+
+        var parentViewController: UIViewController? {
+            var parentResponder: UIResponder? = self
+            while parentResponder != nil {
+                parentResponder = parentResponder?.next
+                if let viewController = parentResponder as? UIViewController {
+                    return viewController
+                }
+            }
+            return nil
+        }
     }
 }
 
-private class SuiView<Content: View>: UIView {
-    var isPresenting: Binding<Bool>!
-    var content: Content! {
-        didSet {
-            controller?.content = content
-        }
-    }
-    var config: PresentationConfig!
-
-    private weak var controller: SuiController<Content>?
-
-    func dismiss(force: Bool = false) {
-        guard (!isPresenting.wrappedValue || force) && controller != nil else { return }
-
-        controller?.dismiss(animated: config.animated, completion: nil)
-        controller = nil
+struct ScreenTransition {
+    enum Phase {
+        case appear
+        case live
+        case disappear
     }
 
-    func present() {
-        guard isPresenting.wrappedValue,
-              controller == nil,
-              let controller = parentViewController,
-              controller.presentedViewController == nil,
-              let content = content else { return }
+    var animation: Animation = .default
+    var phase: Phase = .appear
+}
 
-        let container = SuiController(rootView: content)
-        container.delegate = self
-        switch config.style {
-            case .overlay:
-                container.modalPresentationStyle = .overFullScreen
-            case .fullscreen:
-                container.modalPresentationStyle = .fullScreen
-        }
-        switch config.transition {
-            case .fade:
-                container.modalTransitionStyle = .crossDissolve
-            case .slide:
-                container.modalTransitionStyle = .coverVertical
-        }
-        self.controller = container
-        controller.present(container, animated: config.animated, completion: nil)
-    }
+final private class TransitionWrapperViewVM: ObservableObject {
+    @Published
+    var phase: ScreenTransition = .init()
+}
 
-    func controllerDestroyed() {
-        isPresenting.wrappedValue = false
+struct ScreenTransitionPhaseKey: EnvironmentKey {
+    static let defaultValue: ScreenTransition = .init()
+}
+
+extension EnvironmentValues {
+    var screenTransition: ScreenTransition {
+        get { self[ScreenTransitionPhaseKey.self] }
+        set { self[ScreenTransitionPhaseKey.self] = newValue }
     }
 }
 
-private class SuiController<Content: View>: UIHostingController<Content> {
-    weak var delegate: SuiView<Content>?
+private struct TransitionWrapperView<Wrapped: View>: View {
+    let wrapped: Wrapped
+    let animation: Animation
 
-    private var isDestroying = false
+    @ObservedObject
+    var vm: TransitionWrapperViewVM
 
-    var content: Content! {
-        didSet {
-            redraw()
-        }
+    var body: some View {
+        wrapped
+            .environment(\.screenTransition, vm.phase)
+            .onAppear {
+                vm.phase = .init(animation: animation, phase: .live)
+            }
+    }
+}
+
+final private class PresentingController<C: View>: UIHostingController<AnyView>,
+                                                   UIViewControllerTransitioningDelegate,
+                                                   UIViewControllerAnimatedTransitioning {
+
+    private let vm = TransitionWrapperViewVM()
+    private var isPresenting = false
+    private var binding: Binding<Bool>?
+
+    static private var animation: Animation {
+        .easeOut(duration: animationDuration)
     }
 
-    func redraw() {
-        guard !isDestroying else { return }
-        rootView = content
+    static private var animationDuration: TimeInterval {
+        0.3
+    }
+
+    fileprivate func setBinding(_ binding: Binding<Bool>) {
+        self.binding = binding
+    }
+
+    fileprivate func setContent(_ content: C) {
+        rootView = Self.content(for: content, vm: vm)
+    }
+
+    init(rootView: C) {
+        super.init(rootView: Self.content(for: rootView, vm: vm))
+
+        modalPresentationStyle = .custom
+        transitioningDelegate = self
+        view.backgroundColor = .clear
+    }
+
+    static func content<C: View>(for view: C, vm: TransitionWrapperViewVM) -> AnyView {
+        AnyView(
+            TransitionWrapperView(wrapped: view, animation: animation, vm: vm)
+        )
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        if self.isBeingDismissed {
+            self.binding?.wrappedValue = false
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        if modalPresentationStyle == .overFullScreen {
-            view.backgroundColor = UIColor.clear
+        super.viewWillAppear(animated)
+        if self.isBeingPresented {
+            self.binding?.wrappedValue = true
         }
     }
 
-    override func viewWillDisappear(_ animated: Bool) {
-        isDestroying = isBeingDismissed
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        isPresenting = true
+        return self
     }
 
-    deinit {
-        delegate?.controllerDestroyed()
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+        isPresenting = false
+        return self
     }
-}
 
-private extension UIView {
-    var parentViewController: UIViewController? {
-        var parentResponder: UIResponder? = self
-        while parentResponder != nil {
-            parentResponder = parentResponder?.next
-            if let viewController = parentResponder as? UIViewController {
-                return viewController
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+        Self.animationDuration
+    }
+
+    @MainActor
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+        let containerView = transitionContext.containerView
+        guard let toViewController = transitionContext.viewController(forKey: .to),
+              let fromViewController = transitionContext.viewController(forKey: .from) else {
+            return
+        }
+
+        let duration = transitionDuration(using: transitionContext)
+
+        let dummy = UIView()
+        containerView.addSubview(dummy)
+
+        if isPresenting {
+            containerView.addSubview(toViewController.view)
+            toViewController.view.frame = containerView.bounds
+
+            UIView.animate(withDuration: duration) {
+                dummy.frame = containerView.bounds
+            } completion: {
+                guard $0 else { return }
+                transitionContext.completeTransition(true)
+                dummy.removeFromSuperview()
+            }
+        } else {
+            vm.phase = .init(animation: Self.animation, phase: .disappear)
+
+            UIView.animate(withDuration: duration) {
+                dummy.frame = containerView.bounds
+            } completion: {
+                guard $0 else { return }
+                transitionContext.completeTransition(true)
+                fromViewController.view.removeFromSuperview()
+                dummy.removeFromSuperview()
             }
         }
-        return nil
     }
 }

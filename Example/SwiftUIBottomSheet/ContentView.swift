@@ -111,7 +111,6 @@ struct ContentView: View {
                             .frame(width: 300, height: height)
                     }
                     .frame(maxWidth: .infinity)
-                        .animation(nil)
                 }
 
                 Color.blue

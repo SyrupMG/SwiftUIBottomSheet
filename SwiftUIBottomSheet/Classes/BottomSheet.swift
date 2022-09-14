@@ -123,82 +123,21 @@ public extension View {
     }
 }
 
-private let animationFakeDelay: DispatchTimeInterval = .milliseconds(250)
-
 private struct BottomSheetModifier<SheetContent: View>: ViewModifier {
-    @Binding fileprivate var isSheetPresented: Bool
+    @Binding
+    fileprivate var isSheetPresented: Bool
 
     let config: BottomSheetConfig
-    @ViewBuilder fileprivate let sheetContent: () -> SheetContent
-
-    @State private var modal = false
-    @State private var sheet = false
-    @State private var shown = false
+    @ViewBuilder
+    fileprivate let sheetContent: () -> SheetContent
 
     func body(content: Content) -> some View {
         content
-            .modal(isPresenting: $modal,
-                   config: .init(style: .overlay, transition: .fade, animated: false)) {
-
-                _BottomSheetContent(isPresented: $sheet,
-                                    config: config,
-                                    onCLose: close,
-                                    sheetContent: sheetContent)
+            .presentation(isPresenting: $isSheetPresented) {
+                BottomSheetContainer(isPresented: $isSheetPresented,
+                                     config: config,
+                                     content: sheetContent)
             }
-                   .onReceive(Just(isSheetPresented)) {
-                       if $0 && !modal {
-                           modal = true
-                           sheet = true
-                       }
-                       if !$0 && sheet {
-                           sheet = false
-                       }
-                   }
-    }
-
-    func close() {
-        isSheetPresented = false
-        sheet = false
-        modal = false
-    }
-}
-
-private struct _BottomSheetContent<Content: View>: View {
-    @Binding var isPresented: Bool
-
-    let config: BottomSheetConfig
-    let onCLose: () -> Void
-    @ViewBuilder var sheetContent: () -> Content
-
-    @State private var size: CGSize = .zero
-    @State private var height: CGFloat = 0
-
-    private func hide() {
-        isPresented = false
-    }
-
-    private var contentHeight: CGFloat {
-        min(height, config.maxHeight)
-    }
-
-    var body: some View {
-        GeometryReader { g in
-            BottomSheetContainer(isPresented: $isPresented,
-                                 height: contentHeight,
-                                 config: config,
-                                 onClose: onCLose) {
-                sheetContent()
-                    .fixedSize(horizontal: false, vertical: true)
-                    .geometryFetch(size: $size)
-                    .onReceive(Just(size)) {
-                        let height = $0.height
-
-                        guard height > 0, self.height != height else { return }
-
-                        self.height = height
-                    }
-            }
-        }
     }
 }
 
@@ -207,19 +146,17 @@ private struct BottomSheetContainer<Content: View>: View {
     private var dragToDismissThreshold: CGFloat { min(100, max(0, height - 50)) }
     private var grayBackgroundOpacity: Double { isPresented ? 0.4 : 0 }
 
-    @State private var draggedOffset: CGFloat = 0
+    @State
+    private var draggedOffset: CGFloat = 0
 
-    @Binding var isPresented: Bool
-    private let height: CGFloat
+    @Binding
+    private var isPresented: Bool
     private let config: BottomSheetConfig
-    private let onCLose: () -> Void
 
     private let content: Content
 
     private let topBarHeight: CGFloat = 30
     private let topBarCornerRadius: CGFloat
-
-    @State private var shown = false
 
     var canDrag: Bool {
         config.kind == .interactiveDismiss || config.kind == .resizable
@@ -231,17 +168,12 @@ private struct BottomSheetContainer<Content: View>: View {
 
     public init(
         isPresented: Binding<Bool>,
-        height: CGFloat,
         config: BottomSheetConfig,
-        onClose: @escaping () -> Void,
         @ViewBuilder content: () -> Content
     ) {
         self._isPresented = isPresented
 
         self.config = config
-        self.onCLose = onClose
-
-        self.height = height + topBarHeight
 
         if let topBarCornerRadius = config.topBarCornerRadius {
             self.topBarCornerRadius = topBarCornerRadius
@@ -251,45 +183,39 @@ private struct BottomSheetContainer<Content: View>: View {
         self.content = content()
     }
 
-    public var body: some View {
-        // animations must be disabled while calculating content size
-        let animated = shown && dragStart == nil
+    @Environment(\.screenTransition)
+    private var transition
 
+    var shown: Bool {
+        transition.phase == .live && isPresented
+    }
+
+    public var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .bottom) {
-
                 fullScreenLightGrayOverlay()
 
                 sheetContentContainer(geometry: geometry)
             }
         }
-        .modifier(AnimatableModifierDouble(bindedValue: isPresented ? 1.0 : 0.0) {
-            if !isPresented {
-                shown = false
-                onCLose()
-            }
-        })
-        .animation(animated ? .interactiveSpring() : nil)
-        .onReceive(Just(isPresented)) {
-            if $0 && !shown {
-                shown = true
-            }
-        }
     }
 
+    @ViewBuilder
     fileprivate func fullScreenLightGrayOverlay() -> some View {
         config.overlayColor
-            .opacity(isPresented && shown ? grayBackgroundOpacity : 0)
+            .opacity(shown ? grayBackgroundOpacity : 0)
             .edgesIgnoringSafeArea(.all)
             .onTapGesture {
                 guard canDismiss else { return }
 
                 isPresented = false
             }
+            .animation(transition.animation, value: shown)
     }
 
-    @ViewBuilder func sheetContentContainer(geometry: GeometryProxy) -> some View {
-        let offset = isPresented
+    @ViewBuilder
+    func sheetContentContainer(geometry: GeometryProxy) -> some View {
+        let offset = shown
         ? draggedOffset
         : (height + geometry.safeAreaInsets.bottom + 10) // 10 is for shadows
 
@@ -307,6 +233,17 @@ private struct BottomSheetContainer<Content: View>: View {
             }
         }
         .offset(y: offset)
+        .animation(transition.animation, value: shown)
+        .animation(.interactiveSpring(), value: height)
+        .animation(.interactiveSpring(), value: onDragState)
+        .animation(.interactiveSpring(), value: config.handlePosition)
+    }
+
+    @State
+    private var size: CGSize = .zero
+
+    var height: CGFloat {
+        size.height
     }
 
     @ViewBuilder
@@ -315,10 +252,12 @@ private struct BottomSheetContainer<Content: View>: View {
 
         let clipShape = RoundedCorner(radius: topBarCornerRadius, corners: [.topLeft, .topRight])
 
-        let sheetHeight = max(0, height - shift)
+        let sheetHeight = max(0, height - shift + topBarHeight)
 
         ZStack(alignment: .top) {
             content
+                .geometryFetch(size: $size)
+                .frame(height: height, alignment: .top)
                 .padding(.top, topBarHeight - shift)
                 .clipShape(clipShape)
                 .frame(height: sheetHeight, alignment: .top)
@@ -335,16 +274,19 @@ private struct BottomSheetContainer<Content: View>: View {
         )
     }
 
-    @State private var dragStart: CGFloat?
+    @State
+    private var dragStart: CGFloat?
+
+    @State
+    private var onDragState = false
 
     @ViewBuilder
     fileprivate func topBar(geometry: GeometryProxy) -> some View {
         if canDrag {
-            ZStack {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(Color(.lightGray))
+            BlurView(tintAlpha: 0)
                     .frame(width: 40, height: 6)
-            }
+                    .overlay(Color(.lightGray).opacity(0.8))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
             .frame(width: geometry.size.width, height: topBarHeight)
             .contentShape(Rectangle())
             .gesture(
@@ -361,11 +303,12 @@ private struct BottomSheetContainer<Content: View>: View {
                         if canDismiss && draggedOffset > dragToDismissThreshold {
                             isPresented = false
                         } else {
+                            onDragState.toggle()
                             config.sizeChangeRequest.wrappedValue = height - topBarHeight - draggedOffset
                         }
 
-                        draggedOffset = 0
                         dragStart = nil
+                        draggedOffset = 0
                     }
             )
         } else {
