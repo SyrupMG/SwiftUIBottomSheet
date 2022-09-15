@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-public struct BlurView: UIViewRepresentable {
+struct BlurView: UIViewRepresentable {
     var style: UIBlurEffect.Style = .light
     private(set) var blur: CGFloat?
     private(set) var tintColor: Color?
