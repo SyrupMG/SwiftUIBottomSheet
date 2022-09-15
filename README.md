@@ -92,41 +92,6 @@ That's all, folks :-)
 
 ## Bonus
 
-### .modal
-
-Also SwiftUIBottomSheet provides `.modal()` method because it used to present viewcontroller on wich bottom sheet is drawn. You can use it same way as SwiftUI  `.sheet` method. Main difference is that it shown over full screen instead of being sheet.
-
-```swift
-.modal(isPresenting: $isPresenting) {
-  ...
-}
-
-// or
-
-.modal(item: $optionalModel) {
-  ...
-}
-```
-
-More details you can find in it's code:
-```swift
-struct PresentationConfig {
-    var style: Style = .overlay
-    var transition: Transition = .slide
-    var animated = true // animated transition or not
-
-    enum Style {
-        case fullscreen // nontransparent background
-        case overlay // transparent background, content under it is visible
-    }
-
-    enum Transition {
-        case fade // changes opacity
-        case slide // slide from bottom
-    }
-}
-```
-
 ### OvergrowScrollView
 This view can help organize bottomsheet content when it's height can be dynamically changed and become too large. 
 This view becomes scrollview when it's content exeeds vertical size:
