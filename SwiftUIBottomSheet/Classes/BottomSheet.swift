@@ -144,7 +144,7 @@ private struct BottomSheetModifier<SheetContent: View>: ViewModifier {
 private struct BottomSheetContainer<Content: View>: View {
 
     private var dragToDismissThreshold: CGFloat { min(100, max(0, height - 50)) }
-    private var grayBackgroundOpacity: Double { isPresented ? 0.4 : 0 }
+    private var grayBackgroundOpacity: Double { shown ? 0.4 : 0 }
 
     @State
     private var draggedOffset: CGFloat = 0
@@ -186,16 +186,29 @@ private struct BottomSheetContainer<Content: View>: View {
     @Environment(\.screenTransition)
     private var transition
 
-    var shown: Bool {
-        transition.phase == .live && isPresented
-    }
+    @State
+    private var shown: Bool = false
+
+    @State
+    private var appear = false
 
     public var body: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .bottom) {
-                fullScreenLightGrayOverlay()
+            fullScreenLightGrayOverlay()
+                .overlay(
+                    sheetContentContainer(geometry: geometry), alignment: .bottom
+                )
+        }
+        .onReceive(Just(isPresented && transition.phase == .live && appear)) { newValue in
+            guard newValue != shown else { return }
 
-                sheetContentContainer(geometry: geometry)
+            withAnimation(transition.animation) {
+                shown = newValue
+            }
+        }
+        .onAppear {
+            DispatchQueue.main.async {
+                appear = true
             }
         }
     }
@@ -210,7 +223,6 @@ private struct BottomSheetContainer<Content: View>: View {
 
                 isPresented = false
             }
-            .animation(transition.animation, value: shown)
     }
 
     @ViewBuilder
@@ -233,10 +245,14 @@ private struct BottomSheetContainer<Content: View>: View {
             }
         }
         .offset(y: offset)
-        .animation(transition.animation, value: shown)
         .animation(.interactiveSpring(), value: height)
-        .animation(.interactiveSpring(), value: onDragState)
+        .animation(.interactiveSpring(), value: dragEnded)
         .animation(.interactiveSpring(), value: config.handlePosition)
+        .transaction {
+            if dragStart != nil {
+                $0.animation = .interactiveSpring()
+            }
+        }
     }
 
     @State
@@ -278,7 +294,7 @@ private struct BottomSheetContainer<Content: View>: View {
     private var dragStart: CGFloat?
 
     @State
-    private var onDragState = false
+    private var dragEnded = false
 
     @ViewBuilder
     fileprivate func topBar(geometry: GeometryProxy) -> some View {
@@ -303,12 +319,14 @@ private struct BottomSheetContainer<Content: View>: View {
                         if canDismiss && draggedOffset > dragToDismissThreshold {
                             isPresented = false
                         } else {
-                            onDragState.toggle()
                             config.sizeChangeRequest.wrappedValue = height - topBarHeight - draggedOffset
+
+                            dragEnded.toggle()
+
+                            draggedOffset = 0
                         }
 
                         dragStart = nil
-                        draggedOffset = 0
                     }
             )
         } else {
