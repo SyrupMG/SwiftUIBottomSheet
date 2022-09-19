@@ -1,15 +1,22 @@
 PODS:
-  - SwiftUIBottomSheet (1.1.2)
+  - Introspect (0.1.4)
+  - SwiftUIBottomSheet (1.2.0):
+    - Introspect
 
 DEPENDENCIES:
   - SwiftUIBottomSheet (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - Introspect
 
 EXTERNAL SOURCES:
   SwiftUIBottomSheet:
     :path: "../"
 
 SPEC CHECKSUMS:
-  SwiftUIBottomSheet: 9de42f74eaa4319a863faa5fb448c473005ce5dd
+  Introspect: b62c4dd2063072327c21d618ef2bedc3c87bc366
+  SwiftUIBottomSheet: 24eb5bb059444a4111d961bc02e2ea06372b7adb
 
 PODFILE CHECKSUM: 70f5db4aeeddce16f15ee5454fd9c58ef6389684
 

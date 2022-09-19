@@ -7,8 +7,8 @@
 
 import SwiftUI
 import Combine
+import Introspect
 
-/// NOTE: disables animations inside of it. If animations are needed, they must be applied to content
 public struct OvergrowScrollView<Content: View>: View {
 
     public init(maxHeight: CGFloat, content: @escaping () -> Content) {
@@ -23,27 +23,21 @@ public struct OvergrowScrollView<Content: View>: View {
     @State private var height: CGFloat = 0
 
     public var body: some View {
-        VStack {
-            Group {
-                if height > maxHeight {
-                    ScrollView {
-                        mainContent
-                    }
-                } else {
-                    mainContent
-                }
-            }
-            .frame(height: contentHeight, alignment: .topLeading)
+        ScrollView {
+            mainContent
+        }
+        .introspectScrollView {
+            $0.alwaysBounceVertical = height > maxHeight
         }
         .frame(height: contentHeight, alignment: .topLeading)
-        .clipped()
     }
 
     private var contentHeight: CGFloat {
         min(height, maxHeight)
     }
 
-    @ViewBuilder private var mainContent: some View {
+    @ViewBuilder
+    private var mainContent: some View {
         content()
             .geometryFetch(size: $size)
             .onReceive(Just(size)) {

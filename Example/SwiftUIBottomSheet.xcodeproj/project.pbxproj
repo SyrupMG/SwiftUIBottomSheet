@@ -216,10 +216,12 @@
 			);
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SwiftUIBottomSheet_Example/Pods-SwiftUIBottomSheet_Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Introspect/Introspect.framework",
 				"${BUILT_PRODUCTS_DIR}/SwiftUIBottomSheet/SwiftUIBottomSheet.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Introspect.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwiftUIBottomSheet.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;

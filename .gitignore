@@ -43,3 +43,4 @@ Packages
 xcuserdata
 DerivedData/
 *.xcodeproj
+Example/Pods

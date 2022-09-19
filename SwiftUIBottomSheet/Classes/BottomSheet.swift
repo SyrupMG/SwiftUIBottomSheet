@@ -96,7 +96,7 @@ public extension View {
 
     func bottomSheet<Content: View, T>(item: Binding<T?>,
                                        config: BottomSheetConfig,
-                                       @ViewBuilder content: @escaping (T) -> Content) -> some View {
+                                       content: @escaping (T) -> Content) -> some View {
         modifier(
             BottomSheetModifier(
                 isSheetPresented: item.asBool(),
@@ -169,7 +169,7 @@ private struct BottomSheetContainer<Content: View>: View {
     public init(
         isPresented: Binding<Bool>,
         config: BottomSheetConfig,
-        @ViewBuilder content: () -> Content
+        content: () -> Content
     ) {
         self._isPresented = isPresented
 
@@ -245,7 +245,7 @@ private struct BottomSheetContainer<Content: View>: View {
             }
         }
         .offset(y: offset)
-        .animation(.interactiveSpring(), value: height)
+        .animation(shown ? .interactiveSpring() : nil, value: height)
         .animation(.interactiveSpring(), value: dragEnded)
         .animation(.interactiveSpring(), value: config.handlePosition)
         .transaction {
