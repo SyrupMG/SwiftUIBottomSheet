@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SwiftUIBottomSheet'
-  s.version          = '1.2.3'
+  s.version          = '1.2.4'
   s.summary          = 'SwiftUI BottomSheet implementation'
 
   # This description is used to generate tags and improve search results.
