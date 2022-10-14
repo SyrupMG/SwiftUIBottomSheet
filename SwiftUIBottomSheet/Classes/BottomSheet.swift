@@ -29,7 +29,8 @@ public struct BottomSheetConfig {
                 handleColor: Color = .init(.lightGray),
                 handlePosition: HandlePosition = .inside,
                 topBarCornerRadius: CGFloat? = nil,
-                sizeChangeRequest: Binding<CGFloat> = .constant(0)) {
+                sizeChangeRequest: Binding<CGFloat> = .constant(0),
+                animation: Animation = .interactiveSpring()) {
         self.maxHeight = maxHeight
         self.kind = kind
         self.overlayColor = overlayColor
@@ -39,6 +40,7 @@ public struct BottomSheetConfig {
         self.handlePosition = handlePosition
         self.topBarCornerRadius = topBarCornerRadius
         self.sizeChangeRequest = sizeChangeRequest
+        self.animation = animation
     }
 
     public enum Kind: Int, CaseIterable, Equatable {
@@ -63,6 +65,7 @@ public struct BottomSheetConfig {
     public var handlePosition: HandlePosition
     public var topBarCornerRadius: CGFloat?
     public var sizeChangeRequest: Binding<CGFloat>
+    public var animation: Animation
 }
 
 public extension BottomSheetConfig {
@@ -245,9 +248,9 @@ private struct BottomSheetContainer<Content: View>: View {
             }
         }
         .offset(y: offset)
-        .animation(shown ? .interactiveSpring() : nil, value: height)
-        .animation(.interactiveSpring(), value: dragEnded)
-        .animation(.interactiveSpring(), value: config.handlePosition)
+        .animation(shown ? config.animation : nil, value: height)
+        .animation(config.animation, value: dragEnded)
+        .animation(config.animation, value: config.handlePosition)
         .transaction {
             if dragStart != nil {
                 $0.animation = .interactiveSpring()
