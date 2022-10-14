@@ -29,7 +29,8 @@ public struct BottomSheetConfig {
                 handleColor: Color = .init(.lightGray),
                 handlePosition: HandlePosition = .inside,
                 topBarCornerRadius: CGFloat? = nil,
-                sizeChangeRequest: Binding<CGFloat> = .constant(0)) {
+                sizeChangeRequest: Binding<CGFloat> = .constant(0),
+                isIgnoreKeyboardInset: Bool = false) {
         self.maxHeight = maxHeight
         self.kind = kind
         self.overlayColor = overlayColor
@@ -39,6 +40,7 @@ public struct BottomSheetConfig {
         self.handlePosition = handlePosition
         self.topBarCornerRadius = topBarCornerRadius
         self.sizeChangeRequest = sizeChangeRequest
+        self.isIgnoreKeyboardInset = isIgnoreKeyboardInset
     }
 
     public enum Kind: Int, CaseIterable, Equatable {
@@ -63,6 +65,7 @@ public struct BottomSheetConfig {
     public var handlePosition: HandlePosition
     public var topBarCornerRadius: CGFloat?
     public var sizeChangeRequest: Binding<CGFloat>
+    public var isIgnoreKeyboardInset: Bool
 }
 
 public extension BottomSheetConfig {
@@ -199,6 +202,7 @@ private struct BottomSheetContainer<Content: View>: View {
                     sheetContentContainer(geometry: geometry), alignment: .bottom
                 )
         }
+        .shouldIgnoreKeyboardInset(value: config.isIgnoreKeyboardInset)
         .onReceive(Just(isPresented && transition.phase == .live && appear)) { newValue in
             guard newValue != shown else { return }
 
@@ -404,4 +408,15 @@ struct AnimatableModifierDouble: AnimatableModifier {
     func body(content: Content) -> some View {
         content
     }
+}
+
+private extension GeometryReader {
+  @ViewBuilder
+  func shouldIgnoreKeyboardInset(value: Bool) -> some View {
+    if value {
+      self.ignoresSafeArea(.keyboard, edges: .bottom)
+    } else {
+      self
+    }
+  }
 }
