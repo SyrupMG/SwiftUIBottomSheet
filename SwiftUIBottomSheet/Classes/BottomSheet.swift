@@ -414,7 +414,11 @@ private extension GeometryReader {
   @ViewBuilder
   func shouldIgnoreKeyboardInset(value: Bool) -> some View {
     if value {
-      self.ignoresSafeArea(.keyboard, edges: .bottom)
+      if #available(iOS 14.0, *) {
+        self.ignoresSafeArea(.keyboard, edges: .bottom)
+      } else {
+        self
+      }
     } else {
       self
     }
