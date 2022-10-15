@@ -253,7 +253,7 @@ private struct BottomSheetContainer<Content: View>: View {
         .animation(config.animation, value: config.handlePosition)
         .transaction {
             if dragStart != nil {
-                $0.animation = .interactiveSpring()
+                $0.animation = config.animation
             }
         }
     }
